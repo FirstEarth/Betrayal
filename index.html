@@ -25,20 +25,22 @@
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
-            justify-content: space-evenly;
-            justify-items: center;
+            justify-content: flex-start;
+            justify-items: flex-start;
             align-items: center;
-            align-content: center;
+            align-content: flex-start;
             width: 100%;
-            
+            height: 86vh;
             border: 3px solid red;
         }
         .characterbox{
             flex-direction: column;
             border: 3px solid green;
-            position: relative;
+            /*position: relative;*/
             height: 100%;
             min-height: 100%;
+            justify-content: flex-start;
+            backface-visibility: hidden;
         }
         .traitmeter{
             width: 95%;
@@ -60,8 +62,8 @@
         .controlbar{
             width: 100%;
             flex-direction: row;
-            height: 10%;
-            min-height: 10%;
+            justify-content: space-around;
+            height: 9vh;
         }
 
         .hide{
@@ -73,8 +75,38 @@
             background-color: darkslategrey;
             bottom: 0;
             width: 100%;
-            height: 90%;
+            height: 77vh;
             opacity: 0.4;
+        }
+
+        .switchedition{
+            height: 10vh;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .card{
+            position: relative;
+            perspective: 100px;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .cardfront, .cardback{
+            width: 100%;
+            position: relative;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .cardback{
+            transform: rotateY(180deg);
+            top: -50%;
+        }
+
+        .flipped{
+            transform: rotateY(180deg);
         }
 
     </style>
@@ -86,6 +118,7 @@
                     sibling.classList.remove("selected");
                 } else {
                     sibling.classList.add("selected");
+                    showkillscreen(current.parentElement.parentElement.parentElement.parentElement, sibling.innerText);
                 }
                 sibling = sibling.nextElementSibling;
             }
@@ -100,12 +133,19 @@
                     finder.classList.remove("selected");
                     finder = finder.previousElementSibling;
                     finder.classList.add("selected");
+                    showkillscreen(clicked.parentElement.parentElement.parentElement.parentElement, finder.innerText)
                     break;
                 } else {
                     finder = finder.nextElementSibling;
                 }
             }
             
+        }
+
+        function showkillscreen(charfield , contenido) {
+            if (contenido == "X") {
+                charfield.lastElementChild.classList.remove("hide");
+            }
         }
 
         function changeup(clicked) {
@@ -131,7 +171,7 @@
                 charhold = charhold.nextElementSibling;
             }
             for (let i = 4; i < 12; i=i+2) {
-                let finder1 = charhold.children[i].firstElementChild;
+                let finder1 = charhold.firstElementChild.children[i].firstElementChild;
                 while (finder1) {
                     testtext = finder1.classList.toString();
                     if (testtext.indexOf("default") != -1) {
@@ -142,17 +182,18 @@
                     finder1 = finder1.nextElementSibling;
                 }
             }
+            char.parentElement.parentElement.lastElementChild.classList.add("hide");
         }
 
         function switchchar(char) {
             let finder = char.parentElement.nextElementSibling;
             let testtext = finder.classList.toString();
-                if (testtext.indexOf("hide") != -1) {
-                    finder.classList.remove("hide");
-                    finder.nextElementSibling.classList.add("hide");
+                if (testtext.indexOf("flipped") != -1) {
+                    finder.classList.remove("flipped");
+                    finder.nextElementSibling.classList.add("flipped");
                 } else {
-                    finder.classList.add("hide");
-                    finder.nextElementSibling.classList.remove("hide");
+                    finder.classList.add("flipped");
+                    finder.nextElementSibling.classList.remove("flipped");
             }
         }
     </script>
@@ -164,129 +205,131 @@
                 <div onclick="switchchar(this)">switch</div>
                 <div onclick="resetchar(this)">reset</div>
             </div>
-            <div id="greena" class="">
-                <img class="portrait" src="pics\greena.png" style="width:50%;" />
-                <div class="name">Peter Akimoto</div>
-                <div class="birthday">September 3</div>
-                <div class="traitlabel">Speed</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
+            <div class="card">
+                <div id="greena" class="cardfront">
+                    <img class="portrait" src="pics\greena.png" style="width:50%;" />
+                    <div class="name">Peter Akimoto</div>
+                    <div class="birthday">September 3</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
                 </div>
-                <div class="traitlabel">Might</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">2</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">8</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
-                </div>
-                <div class="traitlabel">Knowledge</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changevalue(this)">8</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
-                </div>
-                <div class="traitlabel">Sanity</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
+                <div id="greenb" class="cardback">
+                    <img class="portrait" src="pics\greenb.png" style="width:50%;" />
+                    <div class="name">Brandon Jaspers</div>
+                    <div class="birthday">May 21</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)">X</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
                 </div>
             </div>
-            <div id="greenb" class="hide">
-                <img class="portrait" src="pics\greenb.png" style="width:50%;" />
-                <div class="name">Brandon Jaspers</div>
-                <div class="birthday">May 21</div>
-                <div class="traitlabel">Speed</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changevalue(this)">8</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
-                </div>
-                <div class="traitlabel">Might</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">2</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
-                </div>
-                <div class="traitlabel">Knowledge</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">1</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
-                </div>
-                <div class="traitlabel">Sanity</div>
-                <div class="traitmeter">
-                    <div class="traitvalue" onclick="changedown(this)">-</div>
-                    <div class="traitvalue" onclick="changevalue(this)">X</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue" onclick="changevalue(this)">3</div>
-                    <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
-                    <div class="traitvalue" onclick="changevalue(this)">5</div>
-                    <div class="traitvalue" onclick="changevalue(this)">6</div>
-                    <div class="traitvalue" onclick="changevalue(this)">7</div>
-                    <div class="traitvalue" onclick="changevalue(this)">8</div>
-                    <div class="traitvalue" onclick="changeup(this)">+</div>
-                </div>
-            </div>
-            <div class="dead"></div>
+            <div class="dead hide"></div>
         </div>
         <div class="characterbox">
             <div id="character2a">
@@ -328,6 +371,9 @@
             </div>
             <div id="character6b"></div>
         </div>
+    </div>
+    <div class="switchedition">
+        switch here
     </div>
 </body>
 </html>
