@@ -1,0 +1,1082 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Betrayal Character App</title>
+    <link href='https://fonts.googleapis.com/css?family=ADLaM Display' rel='stylesheet'>
+    <style>
+        @font-face {
+            font-family: "Zombie Salad";
+            src: url("files/Zombie Salad.ttf") format('truetype');
+            font-family: "Halloween Morning";
+            src: url("files/Halloween Morning.ttf") format('truetype');
+        }
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            min-height: 100%;
+            font-family: "Verdana";
+        }
+
+        div {
+            flex: inherit;
+            display: inherit;
+            flex-direction: inherit;
+            flex-wrap: inherit;
+            justify-content: inherit;
+            justify-items: inherit;
+            align-content: inherit;
+            align-items: inherit;
+        }
+
+        #placebox {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            justify-items: flex-start;
+            align-items: center;
+            align-content: flex-start;
+            width: 100%;
+            height: 100vh;
+            /*border: 3px solid red;*/
+        }
+
+        .characterbox {
+            flex-direction: column;
+            /*border: 3px solid green;*/
+            position: relative;
+            height: 100%;
+            min-height: 100%;
+            justify-content: flex-start;
+            backface-visibility: hidden;
+        }
+
+        .traitmeter {
+            margin-bottom: 20px;
+            width: 95%;
+            flex-direction: row;
+            flex: 1;
+            justify-content: space-around;
+            align-content: space-between;
+            align-items: center;
+            font-family: "ADLaM Display";
+        }
+
+        .traitvalue {
+            border-radius: 5px;
+            background-color: dimgrey;
+            color: ghostwhite;
+            height: 6vh;
+        }
+
+        .selected {
+            border: 3px solid chartreuse;
+            border-radius: 4px;
+        }
+
+        .controlbar {
+            width: 100%;
+            flex-direction: row;
+            justify-content: space-around;
+            height: 9vh;
+            font-size: 15px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .dead {
+            position: absolute;
+            background-color: darkslategrey;
+            bottom: 0;
+            width: 100%;
+            height: 97vh;
+            opacity: 0.8;
+            color: lightgrey;
+            border-radius: 25px;
+        }
+
+        .switchedition {
+            height: 10vh;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .card {
+            position: relative;
+            perspective: 100px;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .cardfront, .cardback {
+            width: 100%;
+            position: relative;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .cardback {
+            transform: rotateY(180deg);
+            top: -50%;
+        }
+
+        .flipped {
+            transform: rotateY(180deg);
+        }
+
+        .tombstone {
+            font-family: 'Zombie Salad';
+            font-size: 180px;
+        }
+
+        .default {
+            color: chartreuse;
+        }
+
+        .deadlabel{
+            font-family: "Halloween Morning";
+            font-size: 60px;
+            
+        }
+        .bio {
+            font-size: 12px;
+        }
+
+        .name{
+            font-size: 18px;
+        }
+    </style>
+    <script>
+        function changevalue(current) {
+            let sibling = current.parentElement.firstElementChild;
+            while (sibling) {
+                if (sibling !== current) {
+                    sibling.classList.remove("selected");
+                } else {
+                    sibling.classList.add("selected");
+                    showkillscreen(current.parentElement.parentElement.parentElement.parentElement, sibling.innerText);
+                }
+                sibling = sibling.nextElementSibling;
+            }
+        }
+
+        function changedown(clicked) {
+            let finder = clicked.nextElementSibling;
+            finder = finder.nextElementSibling;
+            while (finder) {
+                let testtext = finder.classList.toString();
+                if (testtext.indexOf("selected") != -1) {
+                    finder.classList.remove("selected");
+                    finder = finder.previousElementSibling;
+                    finder.classList.add("selected");
+                    showkillscreen(clicked.parentElement.parentElement.parentElement.parentElement, finder.innerText)
+                    break;
+                } else {
+                    finder = finder.nextElementSibling;
+                }
+            }
+
+        }
+
+        function showkillscreen(charfield, contenido) {
+            if (contenido == "f") {
+                charfield.lastElementChild.classList.remove("hide");
+                let audio = new Audio('files/Wilhelm_Scream.ogg');
+                audio.play();
+            }
+        }
+
+        function changeup(clicked) {
+            let finder = clicked.previousElementSibling;
+            finder = finder.previousElementSibling;
+            while (finder) {
+                let testtext = finder.classList.toString();
+                if (testtext.indexOf("selected") != -1) {
+                    finder.classList.remove("selected");
+                    finder = finder.nextElementSibling;
+                    finder.classList.add("selected");
+                    break;
+                } else {
+                    finder = finder.previousElementSibling;
+                }
+            }
+        }
+
+        function resetchar(char) {
+            let charhold = char.parentElement.nextElementSibling;
+            let testtext = charhold.classList.toString();
+            if (testtext.indexOf("flipped") != -1) {
+                charhold = charhold.lastElementChild;
+            } else {
+                charhold = charhold.firstElementChild;
+            }
+            for (let i = 4; i < 12; i = i + 2) {
+                let finder1 = charhold.children[i].firstElementChild;
+                while (finder1) {
+                    testtext = finder1.classList.toString();
+                    if (testtext.indexOf("default") != -1) {
+                        finder1.classList.add("selected");
+                    } else {
+                        finder1.classList.remove("selected");
+                    }
+                    finder1 = finder1.nextElementSibling;
+                }
+            }
+            char.parentElement.parentElement.lastElementChild.classList.add("hide");
+        }
+
+        function switchchar(char) {
+            let finder = char.parentElement.nextElementSibling;
+            let testtext = finder.classList.toString();
+            if (testtext.indexOf("flipped") != -1) {
+                finder.classList.remove("flipped");
+                finder.nextElementSibling.classList.add("flipped");
+            } else {
+                finder.classList.add("flipped");
+                finder.nextElementSibling.classList.remove("flipped");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="placebox">
+        <div class="characterbox">
+            <div class="controlbar">
+                <div onclick="switchchar(this)">switch</div>
+                <div onclick="resetchar(this)">reset</div>
+            </div>
+            <div class="card">
+                <div id="greena" class="cardfront">
+                    <img class="portrait" src="files\greena.png" style="width:50%;" />
+                    <div class="name">Peter Akimoto</div>
+                    <div class="bio" style="margin-bottom:20px">September 3</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Bugs, Basketball</div>
+                </div>
+                <div id="greenb" class="cardback">
+                    <img class="portrait" src="files\greenb.png" style="width:50%;" />
+                    <div class="name">Brandon Jaspers</div>
+                    <div class="bio" style="margin-bottom:20px">May 21</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="default traitvalue selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Computers, Camping, Hockey</div>
+                </div>
+            </div>
+            <div class="dead hide">
+                <div class="tombstone">"</div>
+                <div class="deadlabel">YOU DIED</div>
+            </div>
+        </div>
+        <div class="characterbox">
+            <div class="controlbar">
+                <div onclick="switchchar(this)">switch</div>
+                <div onclick="resetchar(this)">reset</div>
+            </div>
+            <div class="card">
+                <div id="reda" class="cardfront">
+                    <img class="portrait" src="files\reda.png" style="width:50%;" />
+                    <div class="name">Ox Bellows</div>
+                    <div class="bio" style="margin-bottom:20px">October 18</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Football, shiny objects</div>
+                </div>
+                <div id="redb" class="cardback">
+                    <img class="portrait" src="files\redb.png" style="width:50%;" />
+                    <div class="name">Darrin Williams</div>
+                    <div class="bio" style="margin-bottom:20px">June 6</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Track, music, shakespeare</div>
+                </div>
+            </div>
+            <div class="dead hide">
+                <div class="tombstone">"</div>
+                <div class="deadlabel">YOU DIED</div>
+            </div>
+        </div>
+        <div class="characterbox">
+            <div class="controlbar">
+                <div onclick="switchchar(this)">switch</div>
+                <div onclick="resetchar(this)">reset</div>
+            </div>
+            <div class="card">
+                <div id="purplea" class="cardfront">
+                    <img class="portrait" src="files\purplea.png" style="width:50%;" />
+                    <div class="name">Heather Granville</div>
+                    <div class="bio" style="margin-bottom:20px">August 2</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Television, shopping</div>
+                </div>
+                <div id="purpleb" class="cardback">
+                    <img class="portrait" src="files\purpleb.png" style="width:50%;" />
+                    <div class="name">Jenny Leclerc</div>
+                    <div class="bio" style="margin-bottom:20px">March 4</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Reading, soccer</div>
+                </div>
+            </div>
+            <div class="dead hide">
+                <div class="tombstone">"</div>
+                <div class="deadlabel">YOU DIED</div>
+            </div>
+        </div>
+        <div class="characterbox">
+            <div class="controlbar">
+                <div onclick="switchchar(this)">switch</div>
+                <div onclick="resetchar(this)">reset</div>
+            </div>
+            <div class="card">
+                <div id="bluea" class="cardfront">
+                    <img class="portrait" src="files\bluea.png" style="width:50%;" />
+                    <div class="name">Madame Zostra</div>
+                    <div class="bio" style="margin-bottom:20px">December 10</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Astrology, cooking, baseball</div>
+                </div>
+                <div id="blueb" class="cardback">
+                    <img class="portrait" src="files\blueb.png" style="width:50%;" />
+                    <div class="name">Vivan Lopez</div>
+                    <div class="bio" style="margin-bottom:20px">January 11</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Old Movies, Horses</div>
+                </div>
+            </div>
+            <div class="dead hide">
+                <div class="tombstone">"</div>
+                <div class="deadlabel">YOU DIED</div>
+            </div>
+        </div>
+        <div class="characterbox">
+            <div class="controlbar">
+                <div onclick="switchchar(this)">switch</div>
+                <div onclick="resetchar(this)">reset</div>
+            </div>
+            <div class="card">
+                <div id="yellowa" class="cardfront">
+                    <img class="portrait" src="files\yellowa.png" style="width:50%;" />
+                    <div class="name">Missy Dubourde</div>
+                    <div class="bio" style="margin-bottom:20px">February 14</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Swimming, medicine</div>
+                </div>
+                <div id="yellowb" class="cardback">
+                    <img class="portrait" src="files\yellowb.png" style="width:50%;" />
+                    <div class="name">Zoe Ingstrom</div>
+                    <div class="bio" style="margin-bottom:20px">November 5</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="default traitvalue selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Dolls, music</div>
+                </div>
+            </div>
+            <div class="dead hide">
+                <div class="tombstone">"</div>
+                <div class="deadlabel">YOU DIED</div>
+            </div>
+        </div>
+        <div class="characterbox">
+            <div class="controlbar">
+                <div onclick="switchchar(this)">switch</div>
+                <div onclick="resetchar(this)">reset</div>
+            </div>
+            <div class="card">
+                <div id="whitea" class="cardfront">
+                    <img class="portrait" src="files\whitea.png" style="width:50%;" />
+                    <div class="name">Professor Longfellow</div>
+                    <div class="bio" style="margin-bottom:20px">July 27</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Gaelic music, drama, fine wine</div>
+                </div>
+                <div id="whiteb" class="cardback">
+                    <img class="portrait" src="files\whiteb.png" style="width:50%;" />
+                    <div class="name">Father Rhinehardt</div>
+                    <div class="bio" style="margin-bottom:20px">April 29</div>
+                    <div class="traitlabel">Speed</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Might</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">2</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Knowledge</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">1</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Sanity</div>
+                    <div class="traitmeter">
+                        <div class="traitvalue" onclick="changedown(this)">-</div>
+                        <div class="traitvalue" onclick="changevalue(this)" style="font-family: 'Zombie Salad'">f</div>
+                        <div class="traitvalue" onclick="changevalue(this)">3</div>
+                        <div class="traitvalue" onclick="changevalue(this)">4</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue" onclick="changevalue(this)">5</div>
+                        <div class="traitvalue default selected" onclick="changevalue(this)">6</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">7</div>
+                        <div class="traitvalue" onclick="changevalue(this)">8</div>
+                        <div class="traitvalue" onclick="changeup(this)">+</div>
+                    </div>
+                    <div class="traitlabel">Hobbies</div>
+                    <div class="bio">Fencing, gardening</div>
+                </div>
+            </div>
+            <div class="dead hide">
+                <div class="tombstone">"</div>
+                <div class="deadlabel">YOU DIED</div>
+            </div>
+        </div>
+    </div>
+    <div class="switchedition">
+        switch here
+    </div>
+</body>
+</html>
